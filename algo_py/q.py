@@ -1,8 +1,8 @@
-from algo_py import doublelinkedlist
+from .doublelinkedlist import DoubleLinkedList 
 
 class Queue:
     def __init__(self):
-        self.items = doublelinkedlist.DoubleLinkedList()
+        self.items = DoubleLinkedList()
 
     def push(self, item):
         self.items.prepend(item)

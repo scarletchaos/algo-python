@@ -32,7 +32,7 @@ class DoubleLinkedList:
     def prepend(self, value):
         new_node = DoubleLinkedListNode(value)
         current = self.head
-        if not self.tail:
+        if not self.tail or not self.head:
             self.tail = new_node
             self.head = new_node
         elif current:
