@@ -137,11 +137,21 @@ class RBTree:
 
         self.root.color = BLACK
 
+    def transplant(self, curr: RBTreeNode, new: RBTreeNode):
+        if curr.p == None:
+            self.root = new
+        elif curr.isLeft():
+            curr.p.left = new
+        else:
+            curr.p.right = new
+        new.p = curr.p
+
+
     def delete_node(self, value):
         curr = tree.root
         if not curr:
             raise Exception("Delete attempted from empty tree")
-        while curr.value != value:
+        while curr and curr.value != value:
             if value > curr.value:
                 curr = curr.right
             else:
@@ -150,34 +160,119 @@ class RBTree:
         if not curr:
             raise
 
-
-        if not curr.left and not curr.right:
-            if self.root == curr:
-                self.root = None
-                return
-            if curr.color == RED:
-                if curr.isLeft():
-                    curr.p.left = NIL
-                else:
-                    curr.p.right = NIL
-            else: # curr.color == BLACK
-                pass
-
-        else: # only curr.color == BLACK, due to equality of black heights and the fact that there can't be red -> red
-            if curr.left and curr.right: # if curr has 2 children then swap it with biggest in its left subtree
-                tmp = curr.left
+        if curr.left is not NIL and curr.right is not NIL: # if curr has 2 children then swap it with biggest in its left subtree
+            tmp = curr.left
             while tmp.right != NIL:
                 tmp = tmp.right
             tmp.value, curr.value = curr.value, tmp.value
             curr = tmp
 
-            if not curr.left:
+        if not curr:
+            raise
+
+        if curr.left is NIL and curr.right is NIL:
+            if self.root == curr:
+                self.root = None
+                return
+            if curr.isLeft():
+                curr.p.left = NIL
+            else:
+                curr.p.right = NIL
+            curr = curr.p
+        else: # only curr.color == BLACK, due to equality of black heights and the fact that there can't be red -> red
+            if curr.left is NIL:
                 curr.value = curr.right.value
                 curr.right = NIL
             else:
                 curr.value = curr.left.value
                 curr.right = NIL
 
+        self.delete_fixup(curr)
+
+    def delete_fixup(self, node: RBTreeNode):
+        while node != self.root and node.color == BLACK:
+            sib = node.p.left if node.isRight() else node.p.right
+            if node.p.color == RED:
+                if sib.left.color == RED or sib.right.color == RED:
+                    if node.isRight():
+                        if sib.right.color == RED:
+                            self.left_rotate(sib)
+                            self.right_rotate(node.p)
+                        elif sib.left.color == RED:
+                            self.right_rotate(sib)
+                            self.right_rotate(node.p)
+                    else:
+                        if sib.left.color == RED:
+                            self.right_rotate(sib)
+                            self.left_rotate(node.p)
+                        elif sib.right.color == RED:
+                            self.left_rotate(sib)
+                            self.left_rotate(node.p)
+                    node = node.p.p
+                    node.color = RED
+                    node.left.color = BLACK
+                    node.right.color = BLACK
+                else:
+                    sib.color == RED
+                    node.p.color == BLACK
+                    break
+            else: # node.p is black
+                if sib.color == RED:
+                    if node.isRight():
+                        if sib.right.right.color == RED or sib.right.left.color == RED:
+                            self.left_rotate(sib)
+                            self.right_rotate(node.p)
+                            node.p.p.left.right.color = BLACK
+                        else:
+                            self.right_rotate(node.p)
+                            node.p.p.color = BLACK
+                            node.p.left.color = RED
+
+
+                    else:
+                        if sib.left.right.color == RED or sib.left.left.color == RED:
+                            self.right_rotate(sib)
+                            self.left_rotate(node.p)
+                            node.p.p.right.left.color = BLACK
+                        else:
+                            self.left_rotate(node.p)
+                            node.p.p.color = BLACK
+                            node.p.right.color = RED
+                    break
+                else:#sib is black
+                    if sib.left.color == RED or sib.right.color == RED:
+                        if node.isRight():
+                            if sib.right.color == RED:
+                                self.left_rotate(sib)
+                            else:
+                                self.right_rotate(sib)
+                            self.right_rotate(node.p)
+                        else:
+                            if sib.right.color == RED:
+                                self.left_rotate(sib)
+                            else:
+                                self.right_rotate(sib)
+                            self.left_rotate(node.p)
+                        node.p.p.color = BLACK
+                        break
+                    else:
+                        sib.color = RED
+                        node = node.p
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
             
 
 
@@ -187,5 +282,5 @@ if __name__ == "__main__":
     for i in [5, 2, 8, 1, 3, 6, 9]:
         tree.insert_node(10*i)
     print(tree.widthTraversal(tree.root))
-    tree.insert_node(11)
+    tree.delete_node(50)
     print(tree.widthTraversal(tree.root))
