@@ -1,5 +1,6 @@
 .git/
 .ruff_cache/
 .pytest/
+*/__pycache__/*
 poetry.lock
 pyproject.toml
